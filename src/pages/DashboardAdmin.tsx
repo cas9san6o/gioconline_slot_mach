@@ -20,7 +20,7 @@ export const DashboardAdmin = () => {
   const { 
     griglia, isSpinning, crediti, setCrediti, puntata, setPuntata, 
     ultimaVincita, jackpot, stats, gira, setForzatura, simulaSpin,
-    minigiocoAttivo, setMinigiocoAttivo, statoPersonaggio
+    minigiocoAttivo, setMinigiocoAttivo, statoPersonaggio, spinMessage
   } = useSlotLogic();
 
   const [personaggio, setPersonaggio] = useState('volpe');
@@ -73,7 +73,14 @@ export const DashboardAdmin = () => {
         
         <WalletPanel crediti={crediti} puntata={puntata} setPuntata={(p: number) => { playButtonSound(); setPuntata(p); }} ultimaVincita={ultimaVincita} jackpot={jackpot} />
         
-        <div className={`border-4 ${coloreBordi} rounded-2xl`}>
+        <div className={`border-4 ${coloreBordi} rounded-2xl relative`}>
+          {spinMessage && (
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-full text-center z-20">
+              <span className="bg-black/80 text-yellow-400 font-black px-4 py-2 rounded-full border-2 border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)] animate-bounce inline-block">
+                {spinMessage}
+              </span>
+            </div>
+          )}
           <SlotMachine griglia={griglia} isSpinning={isSpinning} />
         </div>
         
@@ -105,7 +112,17 @@ export const DashboardAdmin = () => {
               <button onClick={() => { playButtonSound(); setForzatura('vittoria'); }} className="bg-green-700 hover:bg-green-600 text-white text-xs py-2 rounded">Forza Vittoria</button>
               <button onClick={() => { playButtonSound(); setForzatura('jackpot'); }} className="bg-yellow-600 hover:bg-yellow-500 text-white text-xs py-2 rounded">Forza Jackpot</button>
               <button onClick={() => { playButtonSound(); setForzatura('quasi_vincita'); }} className="bg-blue-700 hover:bg-blue-600 text-white text-xs py-2 rounded">Forza Quasi Vincita</button>
-              <button onClick={() => { playButtonSound(); setForzatura('minigioco'); }} className="bg-purple-700 hover:bg-purple-600 text-white text-xs py-2 rounded">Forza Minigioco</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco'); }} className="bg-purple-700 hover:bg-purple-600 text-white text-xs py-2 rounded">Forza Minigioco (Random)</button>
+            </div>
+            
+            <h3 className="text-sm text-gray-400 font-bold mt-2">FORZA MINIGIOCO SPECIFICO</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_ruota'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Ruota</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_scratch'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Gratta e Vinci</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_find_symbol'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Trova Simbolo</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_pick_box'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Scegli Forziere</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_falling_coins'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Pioggia Monete</button>
+              <button onClick={() => { playButtonSound(); setForzatura('minigioco_jackpot_door'); }} className="bg-purple-800 hover:bg-purple-700 text-white text-xs py-2 rounded border border-purple-500">Porta Jackpot</button>
             </div>
           </div>
 

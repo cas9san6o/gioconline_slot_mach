@@ -23,7 +23,7 @@ export const generaGriglia = (righe: number, colonne: number, esito: string) => 
       griglia[1][c] = simboloVincente;
     }
     griglia[1][colonne - 1] = simboliConfig.find(s => s.id !== simboloVincente.id) || simboliConfig[1];
-  } else if (esito === 'minigioco') {
+  } else if (esito.startsWith('minigioco')) {
      const simboloBonus = simboliConfig.find(s => s.isBonus) || simboliConfig[0];
      griglia[1][0] = simboloBonus;
      griglia[1][2] = simboloBonus;

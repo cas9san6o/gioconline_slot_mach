@@ -1,5 +1,5 @@
 export const temaConfig = {
-  nomeSlot: 'DEV CASINÒ',
+  nomeSlot: 'GiocOnline',
   sfondo: 'bg-black',
   sfondoImmagine: 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=1080&auto=format&fit=crop',
   coloreTitolo: 'from-yellow-200 to-yellow-600',

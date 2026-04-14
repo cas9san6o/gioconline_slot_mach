@@ -12,15 +12,34 @@ export const useSlotLogic = () => {
   const [ultimaVincita, setUltimaVincita] = useState(0);
   const [jackpot, setJackpot] = useState(getJackpot());
   const [stats, setStats] = useState({ spin: 0, vittorie: 0, jackpots: 0, totaleVinto: 0, totalePuntato: 0 });
-  const [forzatura, setForzatura] = useState<'vittoria' | 'jackpot' | 'quasi_vincita' | 'minigioco' | undefined>();
+  const [forzatura, setForzatura] = useState<string | undefined>();
   const [minigiocoAttivo, setMinigiocoAttivo] = useState<string | null>(null);
   const [statoPersonaggio, setStatoPersonaggio] = useState<'idle' | 'vittoria' | 'sconfitta' | 'spin' | 'jackpot'>('idle');
+  const [spinMessage, setSpinMessage] = useState<string | null>(null);
+
+  const encouragingMessages = [
+    "DAI CHE VINCI!",
+    "FORZA!",
+    "QUASI CI SIAMO...",
+    "GIRA GIRA GIRA!",
+    "SENTO PROFUMO DI JACKPOT!",
+    "INCROCIA LE DITA!",
+    "BUONA FORTUNA!"
+  ];
 
   const gira = useCallback(async () => {
     if (isSpinning || crediti < puntata) return;
     
     setIsSpinning(true);
     setStatoPersonaggio('spin');
+    
+    // Mostra un messaggio incoraggiante casuale
+    if (Math.random() > 0.5) {
+      setSpinMessage(encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)]);
+    } else {
+      setSpinMessage(null);
+    }
+
     playSpinSound();
     
     setCrediti(c => c - puntata);
@@ -33,6 +52,7 @@ export const useSlotLogic = () => {
 
     const nuovaGriglia = generaGriglia(3, 5, esito);
     setGriglia(nuovaGriglia);
+    setSpinMessage(null);
 
     let vincita = 0;
     let isJackpot = false;
@@ -43,10 +63,18 @@ export const useSlotLogic = () => {
       setJackpot(resetJackpot());
       playJackpotSound();
       setStatoPersonaggio('jackpot');
-    } else if (esito === 'minigioco') {
-      const minigames = ['ruota', 'scratch', 'find_symbol', 'pick_box', 'falling_coins', 'jackpot_door'];
-      const randomGame = minigames[Math.floor(Math.random() * minigames.length)];
-      setMinigiocoAttivo(randomGame);
+    } else if (esito.startsWith('minigioco')) {
+      let gameToPlay = 'ruota';
+      if (esito === 'minigioco_scratch') gameToPlay = 'scratch';
+      else if (esito === 'minigioco_find_symbol') gameToPlay = 'find_symbol';
+      else if (esito === 'minigioco_pick_box') gameToPlay = 'pick_box';
+      else if (esito === 'minigioco_falling_coins') gameToPlay = 'falling_coins';
+      else if (esito === 'minigioco_jackpot_door') gameToPlay = 'jackpot_door';
+      else if (esito === 'minigioco') {
+        const minigames = ['ruota', 'scratch', 'find_symbol', 'pick_box', 'falling_coins', 'jackpot_door'];
+        gameToPlay = minigames[Math.floor(Math.random() * minigames.length)];
+      }
+      setMinigiocoAttivo(gameToPlay);
       setStatoPersonaggio('idle');
     } else {
       const risultato = calcolaVincita(nuovaGriglia, puntata);
@@ -112,6 +140,6 @@ export const useSlotLogic = () => {
 
   return {
     griglia, isSpinning, crediti, setCrediti, puntata, setPuntata, ultimaVincita, jackpot, stats,
-    gira, setForzatura, simulaSpin, minigiocoAttivo, setMinigiocoAttivo, statoPersonaggio
+    gira, setForzatura, simulaSpin, minigiocoAttivo, setMinigiocoAttivo, statoPersonaggio, spinMessage
   };
 };

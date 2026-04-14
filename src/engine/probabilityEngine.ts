@@ -1,6 +1,6 @@
 import { probabilitaConfig } from '../config/probabilitaConfig';
 
-export const determinaEsito = (forzatura?: 'vittoria' | 'jackpot' | 'quasi_vincita' | 'minigioco') => {
+export const determinaEsito = (forzatura?: string) => {
   if (forzatura) return forzatura;
 
   const rand = Math.random();
