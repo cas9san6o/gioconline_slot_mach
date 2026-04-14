@@ -12,7 +12,11 @@ export const Reel = ({ simboli, isSpinning }: { simboli: any[], isSpinning: bool
           Array(10).fill(0).map((_, i) => <div key={i} className="h-12 md:h-16 flex items-center justify-center text-3xl md:text-4xl bg-white/10 rounded border border-white/5">❓</div>) :
           simboli.map((simbolo, i) => (
             <div key={i} className="h-12 md:h-16 flex items-center justify-center text-3xl md:text-4xl bg-gradient-to-b from-white/20 to-white/5 rounded shadow-inner border border-white/10">
-              {simbolo.icona}
+              {simbolo.icona.startsWith('http') ? (
+                <img src={simbolo.icona} alt={simbolo.nome} className="w-10 h-10 md:w-12 md:h-12 object-contain" referrerPolicy="no-referrer" />
+              ) : (
+                simbolo.icona
+              )}
             </div>
           ))
         }

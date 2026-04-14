@@ -1,6 +1,6 @@
 export const ControlPanel = ({ gira, isSpinning, colorePulsanti = "from-yellow-300 to-yellow-600" }: { gira: () => void, isSpinning: boolean, colorePulsanti?: string }) => {
   return (
-    <div className="flex justify-center mt-2 md:mt-4">
+    <div className="flex justify-center">
       <button 
         onClick={gira} 
         disabled={isSpinning}

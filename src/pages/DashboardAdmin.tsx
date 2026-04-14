@@ -13,8 +13,11 @@ import { FallingCoinsGame } from '../components/FallingCoinsGame';
 import { JackpotDoorGame } from '../components/JackpotDoorGame';
 import { LuxuryIntro } from '../components/LuxuryIntro';
 import { RandomEvents } from '../components/RandomEvents';
+import { LogosPanel } from '../components/LogosPanel';
+import { LegendPanel } from '../components/LegendPanel';
 import { playButtonSound } from '../engine/soundEngine';
 import { temaConfig } from '../config/temaConfig';
+import { personaggiConfig } from '../config/personaggiConfig';
 
 export const DashboardAdmin = () => {
   const { 
@@ -25,6 +28,7 @@ export const DashboardAdmin = () => {
 
   const [personaggio, setPersonaggio] = useState('volpe');
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showLogosPanel, setShowLogosPanel] = useState(false);
   const [sfondo, setSfondo] = useState(temaConfig.sfondo);
   const [sfondoImmagine, setSfondoImmagine] = useState(temaConfig.sfondoImmagine);
   const [font, setFont] = useState(temaConfig.fontPrincipale);
@@ -32,6 +36,7 @@ export const DashboardAdmin = () => {
   const [coloreTitolo, setColoreTitolo] = useState(temaConfig.coloreTitolo);
   const [coloreBordi, setColoreBordi] = useState(temaConfig.coloreBordi);
   const [colorePulsanti, setColorePulsanti] = useState(temaConfig.colorePulsanti);
+  const [updateTrigger, setUpdateTrigger] = useState(0); // Used to force re-render when logos change
   
   const [showIntro, setShowIntro] = useState(true);
   const [showMinigameIntro, setShowMinigameIntro] = useState(false);
@@ -61,14 +66,15 @@ export const DashboardAdmin = () => {
 
       {showIntro && <LuxuryIntro onComplete={() => setShowIntro(false)} />}
       {showMinigameIntro && <LuxuryIntro text="MINIGIOCO SBLOCCATO!" onComplete={() => setShowMinigameIntro(false)} />}
+      {showLogosPanel && <LogosPanel onClose={() => setShowLogosPanel(false)} onUpdate={() => setUpdateTrigger(prev => prev + 1)} />}
 
       {/* Colonna Slot (Mobile First) */}
       <div className="w-full max-w-md lg:max-w-3xl flex flex-col gap-3 md:gap-4 relative z-10">
         <div className="flex justify-between items-center px-2 md:px-4">
-          <CharacterMascot stato={statoPersonaggio} personaggioId={personaggio} />
-          <h1 className={`text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b ${coloreTitolo} italic drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] text-center tracking-wider`}>
+          <h1 className={`text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b ${coloreTitolo} italic drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] tracking-wider`}>
             {nomeSlot}
           </h1>
+          <CharacterMascot key={`mascot-${updateTrigger}`} stato={statoPersonaggio} personaggioId={personaggio} />
         </div>
         
         <WalletPanel crediti={crediti} puntata={puntata} setPuntata={(p: number) => { playButtonSound(); setPuntata(p); }} ultimaVincita={ultimaVincita} jackpot={jackpot} />
@@ -81,10 +87,14 @@ export const DashboardAdmin = () => {
               </span>
             </div>
           )}
-          <SlotMachine griglia={griglia} isSpinning={isSpinning} />
+          <SlotMachine key={`slot-${updateTrigger}`} griglia={griglia} isSpinning={isSpinning} />
         </div>
         
-        <ControlPanel gira={gira} isSpinning={isSpinning} colorePulsanti={colorePulsanti} />
+        <div className="flex items-center justify-between mt-2 md:mt-4 px-4">
+          <LegendPanel />
+          <ControlPanel gira={gira} isSpinning={isSpinning} colorePulsanti={colorePulsanti} />
+          <div className="w-32"></div> {/* Spacer to keep GIRA centered if needed, or just let it flow */}
+        </div>
 
         {minigiocoAttivo === 'playing_ruota' && !showMinigameIntro && <MiniGameWheel onComplete={handleMinigameComplete} />}
         {minigiocoAttivo === 'playing_scratch' && !showMinigameIntro && <ScratchGame onComplete={handleMinigameComplete} />}
@@ -93,18 +103,26 @@ export const DashboardAdmin = () => {
         {minigiocoAttivo === 'playing_falling_coins' && !showMinigameIntro && <FallingCoinsGame onComplete={handleMinigameComplete} />}
         {minigiocoAttivo === 'playing_jackpot_door' && !showMinigameIntro && <JackpotDoorGame onComplete={handleMinigameComplete} />}
 
-        <button 
-          onClick={() => { playButtonSound(); setShowAdminPanel(!showAdminPanel); }}
-          className="fixed bottom-4 right-4 bg-gradient-to-r from-red-600 to-red-800 text-white font-bold py-2 px-4 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.8)] opacity-80 hover:opacity-100 hover:scale-105 transition-all z-50 text-sm md:text-base border-2 border-red-400"
-        >
-          CHEAT
-        </button>
+        {!showAdminPanel && (
+          <button 
+            onClick={() => { playButtonSound(); setShowAdminPanel(true); }}
+            className="fixed bottom-4 right-4 bg-gradient-to-r from-red-600 to-red-800 text-white font-bold py-2 px-4 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.8)] opacity-80 hover:opacity-100 hover:scale-105 transition-all z-50 text-sm md:text-base border-2 border-red-400"
+          >
+            CHEAT
+          </button>
+        )}
       </div>
 
       {/* Colonna Admin Panel */}
       {showAdminPanel && (
-        <div className="w-full max-w-md lg:w-96 bg-gray-900/90 backdrop-blur-md p-4 rounded-xl border-2 border-gray-600 flex flex-col gap-4 overflow-y-auto max-h-[60vh] lg:max-h-[90vh] z-40 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-          <h2 className="text-xl font-bold text-white border-b border-gray-600 pb-2">PANNELLO AMMINISTRATORE</h2>
+        <div className="w-full max-w-md lg:w-96 bg-gray-900/90 backdrop-blur-md p-4 rounded-xl border-2 border-gray-600 flex flex-col gap-4 overflow-y-auto max-h-[60vh] lg:max-h-[90vh] z-40 shadow-[0_0_30px_rgba(0,0,0,0.8)] relative">
+          <button 
+            onClick={() => { playButtonSound(); setShowAdminPanel(false); }}
+            className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700"
+          >
+            &times;
+          </button>
+          <h2 className="text-xl font-bold text-white border-b border-gray-600 pb-2 pr-8">PANNELLO AMMINISTRATORE</h2>
           
           <div className="space-y-2">
             <h3 className="text-sm text-gray-400 font-bold">FORZATURE ESITO</h3>
@@ -138,16 +156,17 @@ export const DashboardAdmin = () => {
             <h3 className="text-sm text-gray-400 font-bold">CONTROLLI AMBIENTE</h3>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => { playButtonSound(); setCrediti(10000); }} className="bg-red-900 hover:bg-red-800 text-white text-xs py-2 rounded">Reset Crediti (10k)</button>
-              <select 
-                value={personaggio} 
-                onChange={(e) => { playButtonSound(); setPersonaggio(e.target.value); }}
-                className="bg-gray-700 text-white text-xs py-2 px-1 rounded"
-              >
-                <option value="volpe">Volpe</option>
-                <option value="coniglio">Coniglio</option>
-                <option value="moneta">Moneta</option>
-              </select>
+              <button onClick={() => { playButtonSound(); setShowLogosPanel(true); }} className="bg-blue-600 hover:bg-blue-500 text-white text-xs py-2 rounded shadow-[0_0_10px_rgba(37,99,235,0.5)]">Loghi</button>
             </div>
+            <select 
+              value={personaggio} 
+              onChange={(e) => { playButtonSound(); setPersonaggio(e.target.value); }}
+              className="bg-gray-700 text-white text-xs py-2 px-1 rounded w-full mt-2"
+            >
+              {personaggiConfig.map(p => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
+              ))}
+            </select>
           </div>
 
           <div className="space-y-2">
@@ -205,9 +224,12 @@ export const DashboardAdmin = () => {
                 onChange={(e) => { playButtonSound(); setFont(e.target.value); }}
                 className="bg-gray-700 text-white text-xs py-2 px-2 rounded"
               >
-                <option value="font-sans">Sans-Serif (Moderno)</option>
-                <option value="font-serif">Serif (Elegante)</option>
-                <option value="font-mono">Monospace (Terminale)</option>
+                <option value="font-sans" className="font-sans">Sans-Serif (Moderno)</option>
+                <option value="font-serif" className="font-serif">Serif (Elegante)</option>
+                <option value="font-mono" className="font-mono">Monospace (Terminale)</option>
+                <option value="font-['Comic_Sans_MS']" style={{ fontFamily: 'Comic Sans MS' }}>Comic (Divertente)</option>
+                <option value="font-['Impact']" style={{ fontFamily: 'Impact' }}>Impact (Forte)</option>
+                <option value="font-['Courier_New']" style={{ fontFamily: 'Courier New' }}>Courier (Macchina da scrivere)</option>
               </select>
             </div>
           </div>

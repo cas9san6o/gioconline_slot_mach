@@ -66,10 +66,10 @@ export const JackpotDoorGame = ({ onComplete }: { onComplete: (premio: number) =
           <div key={i} className="relative w-24 h-40 md:w-32 md:h-56 perspective-1000">
             <motion.div
               onClick={() => handleDoorClick(i)}
-              animate={openedIndex === i ? { rotateY: -105 } : { rotateY: 0 }}
-              transition={{ duration: 1, ease: "easeInOut" }}
+              animate={gameOver ? { rotateY: -105 } : { rotateY: 0 }}
+              transition={{ duration: 1, ease: "easeInOut", delay: gameOver && openedIndex !== i ? 1.5 : 0 }}
               style={{ transformOrigin: "left" }}
-              className={`absolute inset-0 bg-gradient-to-b from-yellow-600 to-yellow-900 border-4 border-yellow-400 rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.5)] cursor-pointer flex items-center justify-center z-20 ${gameOver && openedIndex !== i ? 'opacity-50' : ''}`}
+              className={`absolute inset-0 bg-gradient-to-b from-yellow-600 to-yellow-900 border-4 border-yellow-400 rounded-lg shadow-[0_0_15px_rgba(250,204,21,0.5)] cursor-pointer flex items-center justify-center z-20 ${gameOver && openedIndex !== i ? 'opacity-70' : ''}`}
             >
               <div className="w-4 h-4 bg-yellow-300 rounded-full absolute right-2 top-1/2 -translate-y-1/2 shadow-inner"></div>
               <span className="text-4xl font-black text-yellow-300/50">{i + 1}</span>

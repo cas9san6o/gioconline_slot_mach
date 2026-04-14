@@ -1,6 +1,67 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { playButtonSound, playWinSound, playIntroMelody } from '../engine/soundEngine';
+
+const ScratchCard = ({ symbol, isScratched, onScratchComplete }: { symbol: string, isScratched: boolean, onScratchComplete: () => void }) => {
+  const [scratchedBlocks, setScratchedBlocks] = useState<boolean[]>(Array(25).fill(false));
+  const isCompleted = useRef(false);
+
+  const handleMove = (index: number) => {
+    if (isCompleted.current || isScratched) return;
+    
+    if (!scratchedBlocks[index]) {
+      const newBlocks = [...scratchedBlocks];
+      newBlocks[index] = true;
+      setScratchedBlocks(newBlocks);
+      
+      const scratchedCount = newBlocks.filter(Boolean).length;
+      if (scratchedCount >= 15) { // 60% scratched
+        isCompleted.current = true;
+        onScratchComplete();
+      }
+    }
+  };
+
+  return (
+    <div className="relative aspect-square rounded-xl overflow-hidden shadow-[0_0_15px_rgba(250,204,21,0.2)] border-2 border-yellow-600/50 touch-none">
+      {/* Sfondo (Simbolo rivelato) */}
+      <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-5xl md:text-6xl">
+        {symbol}
+      </div>
+      
+      {/* Copertura da grattare */}
+      <AnimatePresence>
+        {!isScratched && (
+          <motion.div 
+            exit={{ opacity: 0, scale: 1.2, filter: 'blur(10px)' }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 grid grid-cols-5 grid-rows-5"
+          >
+            {scratchedBlocks.map((isBlockScratched, i) => (
+              <div 
+                key={i}
+                onMouseEnter={(e) => { if (e.buttons === 1) handleMove(i); }}
+                onMouseDown={() => handleMove(i)}
+                onTouchMove={(e) => {
+                  const touch = e.touches[0];
+                  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                  if (el && el.getAttribute('data-index')) {
+                    handleMove(parseInt(el.getAttribute('data-index')!, 10));
+                  }
+                }}
+                onTouchStart={() => handleMove(i)}
+                data-index={i}
+                className={`w-full h-full transition-opacity duration-100 ${isBlockScratched ? 'opacity-0' : 'opacity-100 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700'}`}
+              >
+                {!isBlockScratched && i === 12 && <span className="absolute inset-0 flex items-center justify-center text-white/50 font-black text-xl pointer-events-none">GRATTA</span>}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export const ScratchGame = ({ onComplete }: { onComplete: (premio: number) => void }) => {
   const [scratched, setScratched] = useState<boolean[]>(Array(6).fill(false));
@@ -45,7 +106,7 @@ export const ScratchGame = ({ onComplete }: { onComplete: (premio: number) => vo
     setTimeout(() => setShowIntro(false), 3000);
   }, []);
 
-  const handleScratch = (index: number) => {
+  const handleScratchComplete = (index: number) => {
     if (scratched[index] || gameOver) return;
     
     playButtonSound();
@@ -103,35 +164,17 @@ export const ScratchGame = ({ onComplete }: { onComplete: (premio: number) => vo
   return (
     <div className="absolute inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4 backdrop-blur-md">
       <h2 className="text-3xl md:text-5xl font-black text-yellow-400 mb-8 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] text-center">
-        TROVA 3 SIMBOLI UGUALI
+        GRATTA 6 TESSERE
       </h2>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-md">
         {symbols.map((symbol, i) => (
-          <div 
-            key={i}
-            onClick={() => handleScratch(i)}
-            className="relative aspect-square rounded-xl overflow-hidden cursor-pointer shadow-[0_0_15px_rgba(250,204,21,0.2)] border-2 border-yellow-600/50"
-          >
-            {/* Sfondo (Simbolo rivelato) */}
-            <div className="absolute inset-0 bg-gray-900 flex items-center justify-center text-5xl md:text-6xl">
-              {symbol}
-            </div>
-            
-            {/* Copertura da grattare */}
-            <AnimatePresence>
-              {!scratched[i] && (
-                <motion.div 
-                  exit={{ opacity: 0, scale: 1.2, filter: 'blur(10px)' }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-700 flex items-center justify-center"
-                >
-                  <div className="w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                  <span className="absolute text-white/50 font-black text-2xl">GRATTA</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <ScratchCard 
+            key={i} 
+            symbol={symbol} 
+            isScratched={scratched[i]} 
+            onScratchComplete={() => handleScratchComplete(i)} 
+          />
         ))}
       </div>
 

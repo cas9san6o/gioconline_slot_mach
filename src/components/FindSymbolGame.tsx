@@ -120,9 +120,15 @@ export const FindSymbolGame = ({ onComplete }: { onComplete: (premio: number) =>
             key={i}
             onClick={() => handleSymbolClick(symbol)}
             disabled={gameOver}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="aspect-square bg-gray-800/80 border-2 border-blue-500/50 rounded-xl flex items-center justify-center text-4xl md:text-5xl shadow-[0_0_15px_rgba(59,130,246,0.2)]"
+            whileHover={!gameOver ? { scale: 1.05 } : {}}
+            whileTap={!gameOver ? { scale: 0.95 } : {}}
+            className={`aspect-square rounded-xl flex items-center justify-center text-4xl md:text-5xl shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-colors duration-500 ${
+              gameOver 
+                ? symbol === targetSymbol 
+                  ? 'bg-green-600/80 border-4 border-green-400 scale-110 z-10 shadow-[0_0_30px_rgba(74,222,128,1)]' 
+                  : 'bg-gray-800/40 border-2 border-gray-600/50 opacity-50'
+                : 'bg-gray-800/80 border-2 border-blue-500/50'
+            }`}
           >
             {symbol}
           </motion.button>
@@ -135,7 +141,7 @@ export const FindSymbolGame = ({ onComplete }: { onComplete: (premio: number) =>
           animate={{ scale: 1, opacity: 1 }}
           className={`mt-8 text-3xl md:text-5xl font-black ${premio > 0 ? 'text-green-400 drop-shadow-[0_0_20px_rgba(74,222,128,0.8)]' : 'text-red-500'}`}
         >
-          {premio > 0 ? `OTTIMO! +${premio}` : 'TEMPO SCADUTO!'}
+          {premio > 0 ? `OTTIMO! +${premio}` : 'SBAGLIATO!'}
         </motion.div>
       )}
     </div>

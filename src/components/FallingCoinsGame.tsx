@@ -8,6 +8,7 @@ export const FallingCoinsGame = ({ onComplete }: { onComplete: (premio: number) 
   const [showIntro, setShowIntro] = useState(true);
   const [coins, setCoins] = useState<Coin[]>([]);
   const [score, setScore] = useState(0);
+  const [caughtCount, setCaughtCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(10);
   const [gameOver, setGameOver] = useState(false);
 
@@ -59,6 +60,7 @@ export const FallingCoinsGame = ({ onComplete }: { onComplete: (premio: number) 
     if (gameOver) return;
     playButtonSound();
     setScore(s => s + value);
+    setCaughtCount(c => c + 1);
     setCoins(prev => prev.filter(c => c.id !== id));
   };
 
@@ -86,7 +88,10 @@ export const FallingCoinsGame = ({ onComplete }: { onComplete: (premio: number) 
   return (
     <div className="absolute inset-0 bg-black/90 z-50 flex flex-col items-center p-4 backdrop-blur-md overflow-hidden">
       <div className="flex justify-between w-full max-w-md mt-4 z-20">
-        <div className="text-2xl font-black text-yellow-400">CREDITI: {score}</div>
+        <div className="flex flex-col">
+          <div className="text-2xl font-black text-yellow-400">CREDITI: {score}</div>
+          <div className="text-sm font-bold text-gray-300">MONETE PRESE: {caughtCount}</div>
+        </div>
         <div className="text-2xl font-black text-red-500">TEMPO: {timeLeft}s</div>
       </div>
 
@@ -94,7 +99,8 @@ export const FallingCoinsGame = ({ onComplete }: { onComplete: (premio: number) 
         {!gameOver && coins.map(coin => (
           <motion.div
             key={coin.id}
-            onClick={() => catchCoin(coin.id, coin.value)}
+            onMouseDown={() => catchCoin(coin.id, coin.value)}
+            onTouchStart={(e) => { e.preventDefault(); catchCoin(coin.id, coin.value); }}
             initial={{ y: -100, opacity: 1 }}
             animate={{ y: window.innerHeight + 100 }}
             exit={{ scale: 2, opacity: 0 }}
@@ -118,6 +124,9 @@ export const FallingCoinsGame = ({ onComplete }: { onComplete: (premio: number) 
           </div>
           <div className="text-3xl md:text-4xl font-bold text-yellow-400 mt-4">
             HAI RACCOLTO {score}
+          </div>
+          <div className="text-xl font-bold text-white mt-2">
+            ({caughtCount} monete)
           </div>
         </motion.div>
       )}

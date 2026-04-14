@@ -69,16 +69,17 @@ export const PickBonusBoxGame = ({ onComplete }: { onComplete: (premio: number) 
             onClick={() => handleBoxClick(i)}
             whileHover={!gameOver ? { scale: 1.1 } : {}}
             whileTap={!gameOver ? { scale: 0.9 } : {}}
-            className={`relative w-24 h-24 md:w-32 md:h-32 cursor-pointer ${gameOver && openedIndex !== i ? 'opacity-50' : ''}`}
+            className={`relative w-24 h-24 md:w-32 md:h-32 cursor-pointer ${gameOver && openedIndex !== i ? 'opacity-70' : ''}`}
           >
-            {openedIndex === i ? (
+            {gameOver ? (
               <motion.div 
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-yellow-300 to-yellow-600 rounded-xl border-4 border-white shadow-[0_0_30px_rgba(250,204,21,1)] z-10"
+                transition={{ delay: openedIndex === i ? 0 : 1.5 }}
+                className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl border-4 shadow-[0_0_30px_rgba(250,204,21,1)] z-10 ${openedIndex === i ? 'bg-gradient-to-b from-yellow-300 to-yellow-600 border-white' : 'bg-gradient-to-b from-gray-400 to-gray-600 border-gray-300'}`}
               >
-                <span className="text-3xl md:text-4xl">💎</span>
-                <span className="text-xl md:text-2xl font-black text-black">{premio}</span>
+                <span className="text-3xl md:text-4xl">{premio >= 1000 ? '💎' : '🪙'}</span>
+                <span className={`text-xl md:text-2xl font-black ${openedIndex === i ? 'text-black' : 'text-gray-800'}`}>{premio}</span>
               </motion.div>
             ) : (
               <motion.div 
